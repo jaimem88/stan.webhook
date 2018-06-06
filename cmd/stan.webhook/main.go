@@ -62,9 +62,12 @@ func main() {
 	v1.HandleFunc("/stan-webhook", webhook.HandleStanWebhook).Methods(http.MethodPost)
 
 	handler := handlers.CORS(corsAllowedHeaders, corsAllowedDomains, corsAllowedMethods)(r)
-
+	port := config.HTTP.ListenPort
+	if port == "" {
+		port = "8080"
+	}
 	httpServer := &http.Server{
-		Addr:         ":" + config.HTTP.ListenPort,
+		Addr:         ":" + port,
 		ReadTimeout:  httpServerReadTimeout,
 		WriteTimeout: httpServerWriteTimeout,
 		Handler:      handler,

@@ -20,7 +20,7 @@ var config = struct {
 	Environment: "",
 	Hostname:    "",
 	HTTP: &HTTP{
-		ListenPort: "8080",
+		ListenPort: os.Getenv("PORT"),
 	},
 }
 
