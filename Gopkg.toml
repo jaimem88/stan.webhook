@@ -24,6 +24,10 @@
 #   go-tests = true
 #   unused-packages = true
 
+[metadata.heroku]
+  root-package = "github.com/jaimemartinez88/stan.webhook"
+  go-version = "1.10.2"
+  install = [ "./..." ]
 
 [[constraint]]
   name = "github.com/felixge/httpsnoop"
