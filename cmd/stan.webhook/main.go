@@ -6,10 +6,8 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/felixge/httpsnoop"
@@ -20,13 +18,12 @@ import (
 )
 
 const (
-	headerRealIP = "x-real-ip"
-
 	httpServerReadTimeout  = 3 * time.Second
 	httpServerWriteTimeout = 120 * time.Second
 )
 
 var (
+	version            string
 	corsAllowedHeaders = handlers.AllowedHeaders([]string{"*"})
 	corsAllowedDomains = handlers.AllowedOrigins([]string{
 		"http://localhost:3000",
@@ -54,16 +51,15 @@ func main() {
 		loadConfig(*configLocation)
 	}
 
-	log.Println("Starting stan.webhook service")
-
-	s := webhook.NewService(config.Environment, config.Hostname)
+	log.Println("Starting stan.webhook service version: " + version)
 
 	r := mux.NewRouter()
-	r.Use(getRealIPMiddleware)
 	r.Use(loggingMiddleware)
-	r.NotFoundHandler = http.HandlerFunc(s.NotFound)
+	r.NotFoundHandler = http.HandlerFunc(webhook.HandleNotFound)
+	v1 := r.PathPrefix("/v1/").Subrouter()
+	v1.HandleFunc("/healthcheck", webhook.HandleHealthcheck).Methods(http.MethodGet)
 
-	r.HandleFunc("/healthcheck", s.Healthcheck)
+	v1.HandleFunc("/stan-webhook", webhook.HandleStanWebhook).Methods(http.MethodPost)
 
 	handler := handlers.CORS(corsAllowedHeaders, corsAllowedDomains, corsAllowedMethods)(r)
 
@@ -93,35 +89,7 @@ func loggingMiddleware(next http.Handler) http.Handler {
 		// next.ServeHTTP(w, r)
 		l.WithFields(log.Fields{
 			"request-duration": m.Duration,
-			"request-ip":       r.Header.Get(headerRealIP),
 			"response-code":    m.Code,
 		}).Infoln("handler response")
-	})
-}
-
-func getRealIPMiddleware(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		ipAddress := req.RemoteAddr
-		fwdAddress := req.Header.Get("X-Forwarded-For") // capitalisation doesn't matter
-		if fwdAddress != "" {
-			// Got X-Forwarded-For
-			ipAddress = fwdAddress // If it's a single IP, then awesome!
-			// If we got an array... grab the first IP
-			ips := strings.Split(fwdAddress, ", ")
-			if len(ips) > 1 {
-				ipAddress = ips[0]
-			}
-		} else {
-			host, _, err := net.SplitHostPort(ipAddress)
-			if err != nil {
-				host = "127.0.0.1"
-			}
-			if host == "::1" {
-				host = "127.0.0.1"
-			}
-			ipAddress = host
-		}
-		req.Header.Set(headerRealIP, ipAddress)
-		h.ServeHTTP(rw, req)
 	})
 }

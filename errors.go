@@ -6,8 +6,9 @@ import (
 )
 
 var (
-	errBadRequest          = &Error{Code: http.StatusBadRequest, ErrorMessage: "Could not decode request: JSON parsing failed"}
-	errInternalServerError = &Error{Code: http.StatusInternalServerError, ErrorMessage: "Something went wrong :("}
+	errBadRequest                 = &Error{Code: http.StatusBadRequest, ErrorMessage: "Could not decode request: JSON parsing failed"}
+	errBadRequestMalformedPayload = &Error{Code: http.StatusBadRequest, ErrorMessage: "Could not decode request: Malformed Payload"}
+	errInternalServerError        = &Error{Code: http.StatusInternalServerError, ErrorMessage: "Something went wrong :("}
 )
 
 // Error describes custom error that can be used for logging and to write the response inside the handler
