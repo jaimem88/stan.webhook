@@ -17,8 +17,8 @@ var config = struct {
 	Hostname    string `json:"hostname,omitempty"`
 	HTTP        *HTTP  `json:"http,omitempty"`
 }{
-	Environment: "dev",
-	Hostname:    "https//jaimemartinez88.herokuapp.com",
+	Environment: "",
+	Hostname:    "",
 	HTTP: &HTTP{
 		ListenPort: "8080",
 	},
