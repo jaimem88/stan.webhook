@@ -13,7 +13,7 @@ import (
 	"github.com/felixge/httpsnoop"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	webhook "github.com/jaimemartinez88/stan-webhook"
+	"github.com/jaimemartinez88/stan.webhook"
 	log "github.com/sirupsen/logrus"
 )
 
